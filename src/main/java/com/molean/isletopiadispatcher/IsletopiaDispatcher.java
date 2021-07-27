@@ -1,8 +1,9 @@
 package com.molean.isletopiadispatcher;
 
-import com.molean.isletopia.shared.BukkitMessageListener;
 import com.molean.isletopia.shared.MessageHandler;
-import com.molean.isletopia.shared.bungee.PlayerInfoObject;
+import com.molean.isletopia.shared.pojo.obj.PlayerInfoObject;
+import com.molean.isletopia.shared.pojo.WrappedMessageObject;
+import com.molean.isletopia.shared.message.RedisMessageListener;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -64,24 +65,23 @@ public final class IsletopiaDispatcher extends JavaPlugin implements MessageHand
     public void onEnable() {
         plugin = this;
         new AutoSwitchServer();
-        new PlayerChatTweaker();
-        new BukkitMessageListener();
-        getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
-        getScheduler().runTaskTimerAsynchronously(this, this::updatePlayTime, 0, 20 * 60);
-        BukkitMessageListener.setHandler("PlayerInfo", this, PlayerInfoObject.class);
+        RedisMessageListener.init();
+        getScheduler().runTaskTimerAsynchronously(this, this::updatePlayTime, 60, 20 * 60);
+        RedisMessageListener.setHandler("PlayerInfo", this, PlayerInfoObject.class);
     }
 
+    @Override
+    public void onDisable() {
+        RedisMessageListener.destroy();
+    }
 
     public void updatePlayTime() {
+        System.out.println("update");
         long start = System.currentTimeMillis() - 3 * 24 * 60 * 60 * 1000;
         for (String server : getServers()) {
-            if (!getServers().contains(server)) {
-                continue;
-            }
             if (!server.startsWith("server")) {
                 continue;
             }
-
             long serverRecentPlayTime = PlayTimeStatisticsDao.getServerRecentPlayTime(server, start);
             serverPlayTime.put(server, serverRecentPlayTime);
         }
@@ -89,7 +89,7 @@ public final class IsletopiaDispatcher extends JavaPlugin implements MessageHand
     }
 
     @Override
-    public void handle(PlayerInfoObject message) {
+    public void handle(WrappedMessageObject wrappedMessageObject,PlayerInfoObject message) {
         List<String> players = message.getPlayers();
         Map<String, List<String>> playersPerServer = message.getPlayersPerServer();
 

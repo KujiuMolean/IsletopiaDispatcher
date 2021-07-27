@@ -5,8 +5,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 public class PlayTimeStatisticsDao {
-
-
     public static void checkTable() {
         try (Connection connection = DataSourceUtils.getConnection()) {
             String sql = """

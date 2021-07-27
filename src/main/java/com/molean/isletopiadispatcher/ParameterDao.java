@@ -23,8 +23,25 @@ public class ParameterDao {
         return null;
     }
 
+    public static boolean exist(String playerName, String key) {
+        try (Connection connection = DataSourceUtils.getConnection()) {
+            String sql = "select * from isletopia_parameters where player=? and p_key=?";
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, playerName);
+            preparedStatement.setString(2, key);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                return true;
+            }
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return false;
+    }
+
     public static void set(String playerName, String key, String value) {
-        if (get(playerName, key) == null) {
+        if (!exist(playerName, key)) {
             insert(playerName, key, value);
         } else {
             try (Connection connection = DataSourceUtils.getConnection()) {

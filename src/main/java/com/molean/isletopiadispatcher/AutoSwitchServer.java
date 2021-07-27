@@ -1,6 +1,6 @@
 package com.molean.isletopiadispatcher;
 
-import com.molean.isletopia.shared.utils.BukkitBungeeUtils;
+import com.molean.isletopia.shared.message.ServerMessageUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -23,10 +23,11 @@ public class AutoSwitchServer implements Listener {
                 return;
             }
             String server = getParameter(player.getName(), "server");
-            if (server == null) {
+            if (server == null || server.isEmpty()) {
                 String defaultServer = IsletopiaDispatcher.getMinTimeServer();
                 setParameter(player.getName(), "server", defaultServer);
                 server = defaultServer;
+                Bukkit.getLogger().info(player.getName() + " 被分配到 " + server);
             }
             String lastServer = getParameter(player.getName(), "lastServer");
             if (lastServer != null) {
@@ -36,10 +37,9 @@ public class AutoSwitchServer implements Listener {
             Bukkit.getScheduler().runTaskTimerAsynchronously(IsletopiaDispatcher.getPlugin(), (task) -> {
                 if (!player.isOnline()) {
                     task.cancel();
+                    return;
                 }
-
-                BukkitBungeeUtils.switchServer(player, finalServer);
-
+                ServerMessageUtils.switchServer(player.getName(), finalServer);
             }, 0, 20 * 10);
         });
     }
