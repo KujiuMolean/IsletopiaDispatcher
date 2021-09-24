@@ -65,6 +65,7 @@ public final class IsletopiaDispatcher extends JavaPlugin implements MessageHand
     public void onEnable() {
         plugin = this;
         new AutoSwitchServer();
+        new BirthdayCommand();
         RedisMessageListener.init();
         getScheduler().runTaskTimerAsynchronously(this, this::updatePlayTime, 60, 20 * 60);
         RedisMessageListener.setHandler("PlayerInfo", this, PlayerInfoObject.class);
